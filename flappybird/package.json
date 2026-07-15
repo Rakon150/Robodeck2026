@@ -1,0 +1,26 @@
+{
+    "name": "template-jaculus-saturn",
+    "version": "0.1.0",
+    "description": "Saturn ",
+    "dependencies": {
+        "@types/jaculus": "0.1.0",
+        "rphub75": "0.1.0",
+        "colors": "0.1.0",
+        "saturn": "0.1.0",
+        "game-loop": "0.1.0",
+        "button": "0.1.0"
+    },
+    "files": [
+        "build/**/*"
+    ],
+    "type": "module",
+    "main": "./build/index.js",
+    "jaculus": {
+        "packageFormat": 1,
+        "registry": [
+            "https://registry.jaculus.org/"
+        ],
+        "template": true,
+        "projectType": "code"
+    }
+}
