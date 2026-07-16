@@ -24,6 +24,17 @@ export interface Selection {
   } | null;
 }
 
+export interface Clipboard {
+  points: Point[];
+  pixels: string[];
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+}
+
 export interface Point {
   x: number;
   y: number;

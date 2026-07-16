@@ -1,7 +1,8 @@
 /* ============================================
    Pixel Art Editor — Global Styles
-   Catppuccin Mocha–inspired dark theme
    ============================================ */
+
+@import "./themes.css";
 
 /* --- CSS Reset --- */
 *,
@@ -12,21 +13,8 @@
   padding: 0;
 }
 
-/* --- Theme Tokens (Catppuccin Mocha) --- */
+/* --- Shared Tokens (non-color) --- */
 :root {
-  --bg: #11111b;
-  --surface: #1e1e2e;
-  --surface-hover: #313244;
-  --surface-active: #45475a;
-  --text: #cdd6f4;
-  --text-dim: #6c7086;
-  --accent: #89b4fa;
-  --accent-hover: #74c7ec;
-  --error: #f38ba8;
-  --success: #a6e3a1;
-  --warning: #f9e2af;
-  --overlay: rgba(0, 0, 0, 0.6);
-
   --font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, sans-serif;
   --font-mono: "SF Mono", "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas,

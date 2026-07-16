@@ -31,6 +31,17 @@ export function ShortcutsHelp() {
       ],
     },
     {
+      title: "Selection",
+      shortcuts: [
+        { keys: "Arrow Keys", action: "Move selection" },
+        { keys: "Ctrl+C", action: "Copy" },
+        { keys: "Ctrl+X", action: "Cut" },
+        { keys: "Ctrl+V", action: "Paste" },
+        { keys: "Shift + Drag", action: "Add to selection" },
+        { keys: "Ctrl + Drag", action: "Remove from selection" },
+      ],
+    },
+    {
       title: t.currentCanvas,
       shortcuts: [
         { keys: "[", action: "Zoom Out" },
@@ -129,7 +140,8 @@ const modalStyle: React.CSSProperties = {
   border: "1px solid var(--surface-active)",
   borderRadius: 8,
   padding: 24,
-  maxWidth: 400,
+  minWidth: 480,
+  maxWidth: 560,
   maxHeight: "80vh",
   overflow: "auto",
 };

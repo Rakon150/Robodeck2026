@@ -1,0 +1,46 @@
+/* ============================================
+   Theme Tokens
+   Dark:  Catppuccin Mocha
+   Light: Catppuccin Latte
+   ============================================ */
+
+/* --- Dark theme (Catppuccin Mocha) --- */
+[data-theme="dark"] {
+  --bg: #11111b;
+  --surface: #1e1e2e;
+  --surface-hover: #313244;
+  --surface-active: #45475a;
+  --text: #cdd6f4;
+  --text-dim: #6c7086;
+  --accent: #89b4fa;
+  --accent-hover: #74c7ec;
+  --error: #f38ba8;
+  --success: #a6e3a1;
+  --warning: #f9e2af;
+  --overlay: rgba(0, 0, 0, 0.6);
+}
+
+/* --- Light theme (Catppuccin Latte) --- */
+[data-theme="light"] {
+  --bg: #eff1f5;
+  --surface: #e6e9ef;
+  --surface-hover: #ccd0da;
+  --surface-active: #bcc0cc;
+  --text: #4c4f69;
+  --text-dim: #9ca0b0;
+  --accent: #1e66f5;
+  --accent-hover: #209fb5;
+  --error: #d20f39;
+  --success: #40a02b;
+  --warning: #df8e1d;
+  --overlay: rgba(0, 0, 0, 0.4);
+}
+
+/* --- System color-scheme hint --- */
+:root {
+  color-scheme: dark;
+}
+
+:root.light {
+  color-scheme: light;
+}

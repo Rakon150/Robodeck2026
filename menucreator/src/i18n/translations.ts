@@ -50,6 +50,8 @@ export interface Translations {
   opaquePixels: string;
   transparent: string;
   estMemory: string;
+  canvasInfo: string;
+  zoomToFit: string;
 
   // TopBar
   undo: string;
@@ -114,6 +116,8 @@ export const translations: Record<Language, Translations> = {
     opaquePixels: "Opaque pixels",
     transparent: "Transparent",
     estMemory: "Est. memory",
+    canvasInfo: "Canvas Info",
+    zoomToFit: "Zoom to Fit",
 
     undo: "Undo",
     redo: "Redo",
@@ -174,6 +178,8 @@ export const translations: Record<Language, Translations> = {
     opaquePixels: "Neprůhledné pixely",
     transparent: "Průhledné",
     estMemory: "Odhad paměti",
+    canvasInfo: "Info o plátně",
+    zoomToFit: "Přizpůsobit zoom",
 
     undo: "Zpět",
     redo: "Znovu",

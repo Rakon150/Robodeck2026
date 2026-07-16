@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { usePixelStore } from "../store/pixelStore";
 import { useTranslation } from "../i18n";
+import { useTheme } from "./ThemeProvider";
 
 /* ── Catppuccin Mocha tokens ────────────────────────────────── */
 const C = {
@@ -23,8 +24,8 @@ const bar: React.CSSProperties = {
   justifyContent: "space-between",
   height: 48,
   padding: "0 16px",
-  background: C.mantle,
-  borderBottom: `1px solid ${C.surface0}`,
+  background: "var(--surface)",
+  borderBottom: "1px solid var(--surface-active)",
   boxSizing: "border-box",
   userSelect: "none",
   gap: 8,
@@ -44,8 +45,8 @@ const btnBase: React.CSSProperties = {
   padding: "0 10px",
   border: "none",
   borderRadius: 6,
-  background: C.surface0,
-  color: C.text,
+  background: "var(--surface-hover)",
+  color: "var(--text)",
   fontSize: 13,
   fontFamily: "inherit",
   cursor: "pointer",
@@ -62,21 +63,21 @@ const btnDisabled: React.CSSProperties = {
 
 const btnAccent: React.CSSProperties = {
   ...btnBase,
-  background: C.blue,
-  color: C.mantle,
+  background: "var(--accent)",
+  color: "var(--bg)",
   fontWeight: 600,
 };
 
 const btnDanger: React.CSSProperties = {
   ...btnBase,
   background: "transparent",
-  color: C.red,
-  border: `1px solid ${C.red}40`,
+  color: "var(--error)",
+  border: "1px solid rgba(243, 139, 168, 0.25)",
 };
 
 const hint: React.CSSProperties = {
   fontSize: 10,
-  color: C.overlay0,
+  color: "var(--text-dim)",
   marginLeft: 4,
   fontWeight: 400,
 };
@@ -84,14 +85,14 @@ const hint: React.CSSProperties = {
 const title: React.CSSProperties = {
   fontSize: 14,
   fontWeight: 700,
-  color: C.blue,
+  color: "var(--accent)",
   letterSpacing: "-0.01em",
   whiteSpace: "nowrap",
 };
 
 const zoomValue: React.CSSProperties = {
   fontSize: 12,
-  color: C.subtext,
+  color: "var(--text-dim)",
   minWidth: 44,
   textAlign: "center" as const,
   fontVariantNumeric: "tabular-nums",
@@ -100,7 +101,7 @@ const zoomValue: React.CSSProperties = {
 const divider: React.CSSProperties = {
   width: 1,
   height: 20,
-  background: C.surface1,
+  background: "var(--surface-active)",
   margin: "0 4px",
 };
 
@@ -108,8 +109,8 @@ const langSelect: React.CSSProperties = {
   height: 24,
   padding: "0 8px",
   borderRadius: 4,
-  background: C.surface0,
-  color: C.text,
+  background: "var(--surface-hover)",
+  color: "var(--text)",
   border: "none",
   fontSize: 12,
   cursor: "pointer",
@@ -122,8 +123,15 @@ export interface TopBarProps {
   onImport?: () => void;
 }
 
+const THEME_CYCLE: Array<{ label: string; icon: string }> = [
+  { label: "System", icon: "💻" },
+  { label: "Light", icon: "☀️" },
+  { label: "Dark", icon: "🌙" },
+];
+
 export function TopBar({ onExport, onImport }: TopBarProps) {
   const { t, language, setLanguage } = useTranslation();
+  const { theme, setTheme } = useTheme();
   const undo = usePixelStore((s) => s.undo);
   const redo = usePixelStore((s) => s.redo);
   const canUndoVal = usePixelStore((s) => s.historyIndex > 0);
@@ -152,7 +160,7 @@ export function TopBar({ onExport, onImport }: TopBarProps) {
 
   return (
     <header style={bar}>
-      {/* ── Left: title + language selector ── */}
+      {/* ── Left: title + language selector + theme toggle ── */}
       <div style={section}>
         <span style={title}>{t.appTitle}</span>
         <select
@@ -163,6 +171,16 @@ export function TopBar({ onExport, onImport }: TopBarProps) {
           <option value="en">English</option>
           <option value="cs">Čeština</option>
         </select>
+        <button
+          style={btnBase}
+          onClick={() => {
+            const next = theme === "system" ? "light" : theme === "light" ? "dark" : "system";
+            setTheme(next);
+          }}
+          title={`Theme: ${THEME_CYCLE.find(m => m.label.toLowerCase() === theme)?.label ?? "System"}`}
+        >
+          {THEME_CYCLE.find(m => m.label.toLowerCase() === theme)?.icon ?? "💻"}
+        </button>
       </div>
 
       {/* ── Center: undo / redo ── */}
@@ -193,8 +211,8 @@ export function TopBar({ onExport, onImport }: TopBarProps) {
         <button
           style={{
             ...btnBase,
-            background: showGrid ? C.surface1 : C.surface0,
-            color: showGrid ? C.green : C.subtext,
+            background: showGrid ? "var(--surface-active)" : "var(--surface-hover)",
+            color: showGrid ? "var(--success)" : "var(--text-dim)",
           }}
           onClick={toggleGrid}
           title={showGrid ? t.gridLines : t.grid}

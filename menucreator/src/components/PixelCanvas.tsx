@@ -213,6 +213,7 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
   const initializedRef = useRef(false);
   const { addToast } = useToast();
   const { t } = useTranslation();
+  const needsFitToView = usePixelStore((s) => s.needsFitToView);
 
   const redraw = useCallback(() => {
     const cvs = canvasRef.current;
@@ -260,6 +261,32 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
     obs.observe(ctr);
     return () => obs.disconnect();
   }, [redraw]);
+
+  useEffect(() => {
+    const ctr = containerRef.current;
+    if (!ctr) return;
+    const s = usePixelStore.getState();
+    if (s.needsFitToView === 0) return;
+
+    const w = Math.floor(ctr.getBoundingClientRect().width);
+    if (w <= 0) return;
+
+    const { width: gridW, height: gridH } = s.config;
+    const maxDim = Math.max(gridW, gridH);
+    const PADDING = 0.9;
+    const newZoom = (w * PADDING) / (maxDim * BASE_CELL);
+    const clampedZoom = Math.max(0.5, Math.min(8, newZoom));
+
+    const gridPxW = gridW * BASE_CELL * clampedZoom;
+    const gridPxH = gridH * BASE_CELL * clampedZoom;
+    panRef.current = {
+      x: (w - gridPxW) / 2,
+      y: (w - gridPxH) / 2,
+    };
+
+    s.setZoom(clampedZoom);
+    redraw();
+  }, [needsFitToView, redraw]);
 
   useEffect(() => {
     const cvs = canvasRef.current;
@@ -573,7 +600,7 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         aspectRatio: "1 / 1",
         position: "relative",
         overflow: "hidden",
-        background: "#1a1a1a",
+        background: "var(--bg)",
       }}
     >
       <canvas

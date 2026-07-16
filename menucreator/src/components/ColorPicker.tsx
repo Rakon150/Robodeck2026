@@ -3,11 +3,12 @@ import { usePixelStore } from "../store/pixelStore";
 import { useTranslation } from "../i18n";
 import { useToast } from "./Toast";
 
-// 5×6 grid = 30 colors (added 5 more to complete the grid)
+// 4×5 grid = 20 colors
 const PRESET_COLORS = [
-  "#000000", "#ffffff", "#ff0000", "#00ff00", "#0000ff", "#ffff00",
-  "#00ffff", "#ff00ff", "#ff8800", "#8800ff", "#ff5555", "#55ff55",
-  "#5555ff", "#ffff55", "#55ffff", "#ff55ff",
+  "#000000", "#ffffff", "#ff0000", "#00ff00", "#0000ff",
+  "#ffff00", "#00ffff", "#ff00ff", "#ff8800", "#8800ff",
+  "#ff5555", "#55ff55", "#5555ff", "#ffff55", "#55ffff",
+  "#ff55ff", "#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4",
 ];
 
 // HSV to RGB conversion
@@ -382,15 +383,21 @@ export default function ColorPicker() {
 
       {/* HSV Values Display */}
       <div style={styles.hsvRow}>
-        <span style={styles.hsvLabel}>H:</span>
-        <span style={styles.hsvValue}>{Math.round(hue)}°</span>
-        <span style={styles.hsvLabel}>S:</span>
-        <span style={styles.hsvValue}>{Math.round(saturation * 100)}%</span>
-        <span style={styles.hsvLabel}>V:</span>
-        <span style={styles.hsvValue}>{Math.round(value * 100)}%</span>
+        <div style={styles.hsvGroup}>
+          <span style={styles.hsvLabel}>H:</span>
+          <span style={styles.hsvValue}>{Math.round(hue)}°</span>
+        </div>
+        <div style={styles.hsvGroup}>
+          <span style={styles.hsvLabel}>S:</span>
+          <span style={styles.hsvValue}>{Math.round(saturation * 100)}%</span>
+        </div>
+        <div style={styles.hsvGroup}>
+          <span style={styles.hsvLabel}>V:</span>
+          <span style={styles.hsvValue}>{Math.round(value * 100)}%</span>
+        </div>
       </div>
 
-      {/* Color Palette - 5×6 grid */}
+      {/* Color Palette - 5×4 grid */}
       <div style={styles.palette}>
         {PRESET_COLORS.map((c) => (
           <button
@@ -469,10 +476,16 @@ const styles: Record<string, React.CSSProperties> = {
   hsvRow: {
     display: "flex",
     alignItems: "center",
-    gap: 6,
+    justifyContent: "space-between",
     padding: "0 4px",
     fontSize: 11,
     fontFamily: "var(--font-mono)",
+  },
+  hsvGroup: {
+    display: "flex",
+    alignItems: "center",
+    gap: 2,
+    flex: 1,
   },
   hsvLabel: {
     color: "var(--text-dim)",

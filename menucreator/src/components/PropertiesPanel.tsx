@@ -2,25 +2,11 @@ import { useState, useCallback, useMemo } from "react";
 import { usePixelStore } from "../store/pixelStore";
 import { useTranslation } from "../i18n";
 
-/* ── Catppuccin Mocha tokens ────────────────────────────────── */
-const C = {
-  base: "#1e1e2e",
-  mantle: "#181825",
-  surface0: "#313244",
-  surface1: "#45475a",
-  text: "#cdd6f4",
-  subtext: "#a6adc8",
-  blue: "#89b4fa",
-  green: "#a6e3a1",
-  red: "#f38ba8",
-  overlay0: "#6c7086",
-} as const;
-
 /* ── Inline styles ──────────────────────────────────────────── */
 const panel: React.CSSProperties = {
   width: "100%",
-  background: C.base,
-  borderBottom: `1px solid ${C.surface0}`,
+  background: "var(--surface)",
+  borderBottom: "1px solid var(--surface-active)",
   display: "flex",
   flexDirection: "column",
   overflow: "auto",
@@ -30,7 +16,7 @@ const panel: React.CSSProperties = {
 const sectionTitle: React.CSSProperties = {
   fontSize: 11,
   fontWeight: 600,
-  color: C.overlay0,
+  color: "var(--text-dim)",
   textTransform: "uppercase",
   letterSpacing: "0.06em",
   marginBottom: 8,
@@ -38,7 +24,7 @@ const sectionTitle: React.CSSProperties = {
 
 const section: React.CSSProperties = {
   padding: "16px",
-  borderBottom: `1px solid ${C.surface0}`,
+  borderBottom: "1px solid var(--surface-active)",
 };
 
 const row: React.CSSProperties = {
@@ -50,7 +36,7 @@ const row: React.CSSProperties = {
 
 const label: React.CSSProperties = {
   fontSize: 12,
-  color: C.subtext,
+  color: "var(--text-dim)",
   width: 52,
   flexShrink: 0,
 };
@@ -59,10 +45,10 @@ const input: React.CSSProperties = {
   flex: 1,
   height: 28,
   padding: "0 8px",
-  border: `1px solid ${C.surface1}`,
+  border: "1px solid var(--surface-active)",
   borderRadius: 6,
-  background: C.mantle,
-  color: C.text,
+  background: "var(--bg)",
+  color: "var(--text)",
   fontSize: 13,
   fontFamily: "inherit",
   outline: "none",
@@ -74,8 +60,8 @@ const btnApply: React.CSSProperties = {
   height: 30,
   border: "none",
   borderRadius: 6,
-  background: C.blue,
-  color: C.mantle,
+  background: "var(--accent)",
+  color: "var(--bg)",
   fontSize: 12,
   fontWeight: 600,
   fontFamily: "inherit",
@@ -93,12 +79,12 @@ const statRow: React.CSSProperties = {
 
 const statLabel: React.CSSProperties = {
   fontSize: 12,
-  color: C.subtext,
+  color: "var(--text-dim)",
 };
 
 const statValue: React.CSSProperties = {
   fontSize: 13,
-  color: C.text,
+  color: "var(--text)",
   fontWeight: 500,
   fontVariantNumeric: "tabular-nums",
 };
@@ -107,8 +93,8 @@ const dimBadge: React.CSSProperties = {
   display: "inline-block",
   padding: "2px 8px",
   borderRadius: 4,
-  background: C.surface0,
-  color: C.blue,
+  background: "var(--surface-hover)",
+  color: "var(--accent)",
   fontSize: 12,
   fontWeight: 600,
   fontVariantNumeric: "tabular-nums",
@@ -143,6 +129,7 @@ export function PropertiesPanel() {
   const config = usePixelStore((s) => s.config);
   const layers = usePixelStore((s) => s.layers);
   const setGridSize = usePixelStore((s) => s.setGridSize);
+  const fitToView = usePixelStore((s) => s.fitToView);
 
   const [widthInput, setWidthInput] = useState(config.width);
   const [heightInput, setHeightInput] = useState(config.height);
@@ -215,9 +202,9 @@ export function PropertiesPanel() {
         </button>
       </div>
 
-      {/* ── Current Dimensions ── */}
+      {/* ── Canvas Info ── */}
       <div style={section}>
-        <div style={sectionTitle}>{t.currentCanvas}</div>
+        <div style={sectionTitle}>{t.canvasInfo}</div>
 
         <div style={statRow}>
           <span style={statLabel}>{t.dimensions}</span>
@@ -227,21 +214,11 @@ export function PropertiesPanel() {
         </div>
 
         <div style={statRow}>
-          <span style={statLabel}>{t.zoom}</span>
-          <span style={statValue}>{Math.round(config.zoom * 100)}%</span>
-        </div>
-
-        <div style={statRow}>
           <span style={statLabel}>{t.gridLines}</span>
-          <span style={{ ...statValue, color: config.showGrid ? C.green : C.overlay0 }}>
+          <span style={{ ...statValue, color: config.showGrid ? "var(--success)" : "var(--text-dim)" }}>
             {config.showGrid ? t.on : t.off}
           </span>
         </div>
-      </div>
-
-      {/* ── Stats ── */}
-      <div style={section}>
-        <div style={sectionTitle}>{t.statistics}</div>
 
         <div style={statRow}>
           <span style={statLabel}>{t.totalPixels}</span>
@@ -252,7 +229,7 @@ export function PropertiesPanel() {
 
         <div style={statRow}>
           <span style={statLabel}>{t.opaquePixels}</span>
-          <span style={{ ...statValue, color: pixelCount > 0 ? C.green : C.overlay0 }}>
+          <span style={{ ...statValue, color: pixelCount > 0 ? "var(--success)" : "var(--text-dim)" }}>
             {pixelCount}
           </span>
         </div>
@@ -268,6 +245,10 @@ export function PropertiesPanel() {
           <span style={statLabel}>{t.estMemory}</span>
           <span style={statValue}>{memoryEstimate}</span>
         </div>
+
+        <button style={btnApply} onClick={fitToView}>
+          {t.zoomToFit}
+        </button>
       </div>
     </aside>
   );

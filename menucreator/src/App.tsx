@@ -10,6 +10,8 @@ import { PropertiesPanel } from "./components/PropertiesPanel";
 import { CodeExporter } from "./components/CodeExporter";
 import { LayersPanel } from "./components/LayersPanel";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
+import { MobileWarning } from "./components/MobileWarning";
+import { ToolOptionsPanel } from "./components/ToolOptionsPanel";
 
 const TOOL_SHORTCUTS: Record<string, Tool> = {
   b: "pencil",
@@ -36,7 +38,12 @@ export function App() {
   const setZoom = usePixelStore((s) => s.setZoom);
   const config = usePixelStore((s) => s.config);
   const deleteSelection = usePixelStore((s) => s.deleteSelection);
+  const moveSelection = usePixelStore((s) => s.moveSelection);
+  const copySelection = usePixelStore((s) => s.copySelection);
+  const cutSelection = usePixelStore((s) => s.cutSelection);
+  const pasteClipboard = usePixelStore((s) => s.pasteClipboard);
   const selection = usePixelStore((s) => s.selection);
+  const clipboard = usePixelStore((s) => s.clipboard);
   const { addToast } = useToast();
 
   // Keep ref in sync for keyboard handler
@@ -65,12 +72,59 @@ export function App() {
         return;
       }
 
-      // --- Tool shortcuts (only when no modifier) ---
+      if ((e.ctrlKey || e.metaKey) && e.key === "c") {
+        if (selection && selection.points.length > 0) {
+          e.preventDefault();
+          copySelection();
+          addToast("Selection copied", "success");
+          return;
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "x") {
+        if (selection && selection.points.length > 0) {
+          e.preventDefault();
+          cutSelection();
+          addToast("Selection cut", "success");
+          return;
+        }
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === "v") {
+        if (clipboard) {
+          e.preventDefault();
+          pasteClipboard();
+          addToast("Pasted from clipboard", "success");
+          return;
+        }
+      }
+
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
         if (e.key === "Delete" || e.key === "Backspace") {
           if (selection && selection.points.length > 0) {
             e.preventDefault();
             deleteSelection();
+            return;
+          }
+        }
+
+        if (selection && selection.points.length > 0) {
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            moveSelection(0, -1);
+            return;
+          }
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            moveSelection(0, 1);
+            return;
+          }
+          if (e.key === "ArrowLeft") {
+            e.preventDefault();
+            moveSelection(-1, 0);
+            return;
+          }
+          if (e.key === "ArrowRight") {
+            e.preventDefault();
+            moveSelection(1, 0);
             return;
           }
         }
@@ -98,7 +152,7 @@ export function App() {
         setIsPanMode(true);
       }
     },
-    [undo, redo, setActiveTool, setZoom, config.zoom, deleteSelection, selection],
+    [undo, redo, setActiveTool, setZoom, config.zoom, deleteSelection, moveSelection, copySelection, cutSelection, pasteClipboard, selection, clipboard, addToast],
   );
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {
@@ -199,6 +253,12 @@ export function App() {
 
       {/* Keyboard Shortcuts Help */}
       <ShortcutsHelp />
+
+      {/* Mobile device warning */}
+      <MobileWarning />
+
+      {/* Tool Options Panel */}
+      <ToolOptionsPanel />
     </div>
   );
 }

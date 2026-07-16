@@ -9,6 +9,7 @@ import type {
   ShapePreview,
   SceneShape,
   Selection,
+  Clipboard,
   Layer,
 } from "../types";
 import { createEmptyGrid, cloneGrid, GRID_SIZE, TRANSPARENT } from "../types";
@@ -39,12 +40,17 @@ interface PixelStore {
   activeTool: Tool;
   currentColor: string;
   shapeFill: ShapeFill;
+  brushSize: number;
+  strokeWidth: number;
 
   selection: Selection | null;
   shapePreview: ShapePreview | null;
+  clipboard: Clipboard | null;
 
   history: HistoryEntry[];
   historyIndex: number;
+
+  needsFitToView: number;
 
   // Layer operations
   addLayer: (name?: string) => void;
@@ -70,6 +76,8 @@ interface PixelStore {
   setActiveTool: (tool: Tool) => void;
   setCurrentColor: (color: string) => void;
   setShapeFill: (fill: ShapeFill) => void;
+  setBrushSize: (size: number) => void;
+  setStrokeWidth: (width: number) => void;
   setShapePreview: (preview: ShapePreview | null) => void;
 
   setSelection: (selection: Selection | null) => void;
@@ -79,9 +87,14 @@ interface PixelStore {
   moveSelection: (dx: number, dy: number) => void;
   fillSelection: (color: string) => void;
 
+  copySelection: () => void;
+  cutSelection: () => void;
+  pasteClipboard: (x?: number, y?: number) => void;
+
   setGridSize: (width: number, height: number) => void;
   toggleGrid: () => void;
   setZoom: (zoom: number) => void;
+  fitToView: () => void;
 
   pushHistory: () => void;
   undo: () => void;
@@ -117,12 +130,16 @@ export const usePixelStore = create<PixelStore>((set, get) => {
     activeTool: "pencil",
     currentColor: "#ff0000",
     shapeFill: "filled",
+    brushSize: 1,
+    strokeWidth: 1,
 
     selection: null,
     shapePreview: null,
+    clipboard: null,
 
     history: [{ grid: createEmptyGrid(), shapes: [], timestamp: Date.now() }],
     historyIndex: 0,
+    needsFitToView: 0,
 
     addLayer: (name) => {
       const { layers, config } = get();
@@ -290,6 +307,8 @@ export const usePixelStore = create<PixelStore>((set, get) => {
     setActiveTool: (tool) => set({ activeTool: tool, shapePreview: null, selection: null }),
     setCurrentColor: (color) => set({ currentColor: color }),
     setShapeFill: (fill) => set({ shapeFill: fill }),
+    setBrushSize: (size) => set({ brushSize: Math.max(1, Math.min(16, size)) }),
+    setStrokeWidth: (width) => set({ strokeWidth: Math.max(1, Math.min(8, width)) }),
     setShapePreview: (preview) => set({ shapePreview: preview }),
 
     addShape: (shape) => set(s => ({ shapes: [...s.shapes, shape] })),
@@ -321,6 +340,9 @@ export const usePixelStore = create<PixelStore>((set, get) => {
 
     setZoom: (zoom) =>
       set(s => ({ config: { ...s.config, zoom: Math.max(0.5, Math.min(8, zoom)) } })),
+
+    fitToView: () =>
+      set(s => ({ needsFitToView: s.needsFitToView + 1 })),
 
     setSelection: (selection) => set({ selection }),
     addToSelection: (points) => {
@@ -406,6 +428,71 @@ export const usePixelStore = create<PixelStore>((set, get) => {
       const newLayers = [...layers];
       newLayers[layerIndex] = { ...layer, grid: newGrid };
       set({ layers: newLayers });
+      get().pushHistory();
+    },
+
+    copySelection: () => {
+      const { selection, layers, activeLayerId, config } = get();
+      if (!selection || selection.points.length === 0) return;
+      const layer = layers.find(l => l.id === activeLayerId);
+      if (!layer) return;
+      
+      const bounds = selection.bounds ?? calculateBounds(selection.points);
+      if (!bounds) return;
+      
+      const pixels: string[] = [];
+      for (let y = bounds.y; y < bounds.y + bounds.height; y++) {
+        for (let x = bounds.x; x < bounds.x + bounds.width; x++) {
+          const isSelected = selection.points.some(p => p.x === x && p.y === y);
+          if (isSelected) {
+            pixels.push(layer.grid[y]?.[x] ?? TRANSPARENT);
+          } else {
+            pixels.push(TRANSPARENT);
+          }
+        }
+      }
+      
+      set({ clipboard: { points: selection.points, pixels, bounds } });
+    },
+
+    cutSelection: () => {
+      const { copySelection, deleteSelection } = get();
+      copySelection();
+      deleteSelection();
+    },
+
+    pasteClipboard: (x?: number, y?: number) => {
+      const { clipboard, layers, activeLayerId, config } = get();
+      if (!clipboard) return;
+      const layerIndex = layers.findIndex(l => l.id === activeLayerId);
+      if (layerIndex === -1) return;
+      const layer = layers[layerIndex]!;
+      if (layer.locked) return;
+      
+      const pasteX = x ?? Math.max(0, Math.floor(config.width / 2 - clipboard.bounds.width / 2));
+      const pasteY = y ?? Math.max(0, Math.floor(config.height / 2 - clipboard.bounds.height / 2));
+      
+      const newGrid = cloneGrid(layer.grid);
+      const newPoints: Point[] = [];
+      
+      for (let dy = 0; dy < clipboard.bounds.height; dy++) {
+        for (let dx = 0; dx < clipboard.bounds.width; dx++) {
+          const px = pasteX + dx;
+          const py = pasteY + dy;
+          const pixelIndex = dy * clipboard.bounds.width + dx;
+          const color = clipboard.pixels[pixelIndex];
+          
+          if (color && color !== TRANSPARENT && px >= 0 && px < config.width && py >= 0 && py < config.height) {
+            newGrid[py]![px] = color;
+            newPoints.push({ x: px, y: py });
+          }
+        }
+      }
+      
+      const bounds = calculateBounds(newPoints);
+      const newLayers = [...layers];
+      newLayers[layerIndex] = { ...layer, grid: newGrid };
+      set({ layers: newLayers, selection: { points: newPoints, bounds } });
       get().pushHistory();
     },
 
