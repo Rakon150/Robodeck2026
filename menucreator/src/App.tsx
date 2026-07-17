@@ -258,7 +258,7 @@ export function App() {
       <MobileWarning />
 
       {/* Tool Options Panel */}
-      <ToolOptionsPanel />
+      <ToolOptionsPanel sidebarWidth={sidebarWidth} />
     </div>
   );
 }

@@ -272,16 +272,18 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
     if (w <= 0) return;
 
     const { width: gridW, height: gridH } = s.config;
-    const maxDim = Math.max(gridW, gridH);
-    const PADDING = 0.9;
-    const newZoom = (w * PADDING) / (maxDim * BASE_CELL);
-    const clampedZoom = Math.max(0.5, Math.min(8, newZoom));
+    const gridPxW = gridW * BASE_CELL;
+    const gridPxH = gridH * BASE_CELL;
+    const zoomX = w / gridPxW;
+    const zoomY = w / gridPxH;
+    const newZoom = Math.min(zoomX, zoomY);
+    const clampedZoom = Math.max(0.5, Math.min(1, newZoom));
 
-    const gridPxW = gridW * BASE_CELL * clampedZoom;
-    const gridPxH = gridH * BASE_CELL * clampedZoom;
+    const zoomedGridPxW = gridPxW * clampedZoom;
+    const zoomedGridPxH = gridPxH * clampedZoom;
     panRef.current = {
-      x: (w - gridPxW) / 2,
-      y: (w - gridPxH) / 2,
+      x: (w - zoomedGridPxW) / 2,
+      y: (w - zoomedGridPxH) / 2,
     };
 
     s.setZoom(clampedZoom);

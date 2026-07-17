@@ -1,5 +1,5 @@
 import { usePixelStore } from "../store/pixelStore";
-import type { Tool, ShapeFill } from "../types";
+import type { Tool } from "../types";
 import { useTranslation } from "../i18n";
 
 interface ToolDef {
@@ -71,11 +71,7 @@ const SelectIcon = () => (
 export default function Toolbar() {
   const { t } = useTranslation();
   const activeTool = usePixelStore((s) => s.activeTool);
-  const shapeFill = usePixelStore((s) => s.shapeFill);
   const setActiveTool = usePixelStore((s) => s.setActiveTool);
-  const setShapeFill = usePixelStore((s) => s.setShapeFill);
-
-  const showFillToggle = activeTool === "rectangle" || activeTool === "circle";
 
   const tools: ToolDef[] = [
     { id: "pencil", label: t.pencil, shortcut: "B", icon: <PencilIcon /> },
@@ -109,35 +105,6 @@ export default function Toolbar() {
         ))}
       </div>
 
-      {showFillToggle && (
-        <div style={styles.section}>
-          <div style={styles.label}>{t.fillMode}</div>
-          <div style={styles.radioGroup}>
-            <label style={styles.radioLabel}>
-              <input
-                type="radio"
-                name="shapeFill"
-                value="filled"
-                checked={shapeFill === "filled"}
-                onChange={() => setShapeFill("filled")}
-                style={styles.radio}
-              />
-              {t.filled}
-            </label>
-            <label style={styles.radioLabel}>
-              <input
-                type="radio"
-                name="shapeFill"
-                value="outline"
-                checked={shapeFill === "outline"}
-                onChange={() => setShapeFill("outline")}
-                style={styles.radio}
-              />
-              {t.outline}
-            </label>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

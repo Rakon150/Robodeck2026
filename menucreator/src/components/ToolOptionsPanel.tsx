@@ -1,8 +1,12 @@
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState } from "react";
 import { usePixelStore } from "../store/pixelStore";
 import { useTranslation } from "../i18n";
 
-export function ToolOptionsPanel() {
+interface ToolOptionsPanelProps {
+  sidebarWidth: number;
+}
+
+export function ToolOptionsPanel({ sidebarWidth }: ToolOptionsPanelProps) {
   const { t } = useTranslation();
   const activeTool = usePixelStore((s) => s.activeTool);
   const shapeFill = usePixelStore((s) => s.shapeFill);
@@ -13,64 +17,27 @@ export function ToolOptionsPanel() {
   const setStrokeWidth = usePixelStore((s) => s.setStrokeWidth);
 
   const [isMinimized, setIsMinimized] = useState(false);
-  const [position, setPosition] = useState({ x: 80, y: 60 });
-  const [isDragging, setIsDragging] = useState(false);
-  const dragRef = useRef<{ startX: number; startY: number; posX: number; posY: number } | null>(null);
 
   const hasOptions = activeTool === "pencil" || activeTool === "eraser" || 
                      activeTool === "rectangle" || activeTool === "circle" || activeTool === "line";
-
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-    dragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      posX: position.x,
-      posY: position.y,
-    };
-  }, [position]);
-
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!dragRef.current) return;
-      const dx = e.clientX - dragRef.current.startX;
-      const dy = e.clientY - dragRef.current.startY;
-      setPosition({
-        x: dragRef.current.posX + dx,
-        y: dragRef.current.posY + dy,
-      });
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      dragRef.current = null;
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    window.addEventListener("mouseup", handleMouseUp);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging]);
 
   if (!hasOptions) return null;
 
   const toolName = t[activeTool] || activeTool;
 
+  const panelX = sidebarWidth + 12;
+  const panelY = 56;
+
   return (
     <div
       style={{
         ...styles.panel,
-        left: position.x,
-        top: position.y,
-        opacity: isDragging ? 0.95 : 1,
+        left: panelX,
+        top: panelY,
+        width: sidebarWidth,
       }}
     >
-      <div style={styles.header} onMouseDown={handleMouseDown}>
+      <div style={styles.header}>
         <span style={styles.title}>{toolName}</span>
         <button
           style={styles.minimizeBtn}
@@ -86,16 +53,16 @@ export function ToolOptionsPanel() {
           {(activeTool === "pencil" || activeTool === "eraser") && (
             <div style={styles.option}>
               <label style={styles.label}>Brush Size</label>
-              <div style={styles.sliderRow}>
+              <div style={styles.inputRow}>
                 <input
-                  type="range"
+                  type="number"
                   min={1}
                   max={16}
                   value={brushSize}
                   onChange={(e) => setBrushSize(Number(e.target.value))}
-                  style={styles.slider}
+                  style={styles.numberInput}
                 />
-                <span style={styles.value}>{brushSize}px</span>
+                <span style={styles.unit}>px</span>
               </div>
             </div>
           )}
@@ -131,16 +98,16 @@ export function ToolOptionsPanel() {
               </div>
               <div style={styles.option}>
                 <label style={styles.label}>Stroke Width</label>
-                <div style={styles.sliderRow}>
+                <div style={styles.inputRow}>
                   <input
-                    type="range"
+                    type="number"
                     min={1}
                     max={8}
                     value={strokeWidth}
                     onChange={(e) => setStrokeWidth(Number(e.target.value))}
-                    style={styles.slider}
+                    style={styles.numberInput}
                   />
-                  <span style={styles.value}>{strokeWidth}px</span>
+                  <span style={styles.unit}>px</span>
                 </div>
               </div>
             </>
@@ -149,16 +116,16 @@ export function ToolOptionsPanel() {
           {activeTool === "line" && (
             <div style={styles.option}>
               <label style={styles.label}>Stroke Width</label>
-              <div style={styles.sliderRow}>
+              <div style={styles.inputRow}>
                 <input
-                  type="range"
+                  type="number"
                   min={1}
                   max={8}
                   value={strokeWidth}
                   onChange={(e) => setStrokeWidth(Number(e.target.value))}
-                  style={styles.slider}
+                  style={styles.numberInput}
                 />
-                <span style={styles.value}>{strokeWidth}px</span>
+                <span style={styles.unit}>px</span>
               </div>
             </div>
           )}
@@ -225,23 +192,27 @@ const styles: Record<string, React.CSSProperties> = {
     textTransform: "uppercase",
     letterSpacing: "0.04em",
   },
-  sliderRow: {
+  inputRow: {
     display: "flex",
     alignItems: "center",
-    gap: 8,
+    gap: 4,
   },
-  slider: {
-    flex: 1,
-    height: 4,
-    accentColor: "var(--accent)",
-    cursor: "pointer",
-  },
-  value: {
-    fontSize: 12,
+  numberInput: {
+    width: 60,
+    height: 28,
+    padding: "0 8px",
+    border: "1px solid var(--surface-active)",
+    borderRadius: 6,
+    background: "var(--bg)",
     color: "var(--text)",
-    fontFamily: "var(--font-mono)",
-    minWidth: 36,
-    textAlign: "right",
+    fontSize: 13,
+    fontFamily: "inherit",
+    outline: "none",
+    fontVariantNumeric: "tabular-nums",
+  },
+  unit: {
+    fontSize: 12,
+    color: "var(--text-dim)",
   },
   radioGroup: {
     display: "flex",

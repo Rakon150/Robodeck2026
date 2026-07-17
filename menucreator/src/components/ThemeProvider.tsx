@@ -28,15 +28,18 @@ function getSystemTheme(): ResolvedTheme {
     : "dark";
 }
 
+function getCookie(name: string): string | null {
+  const match = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+  return match?.[1] ? decodeURIComponent(match[1]) : null;
+}
+
 function getStoredTheme(): Theme {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
+    const stored = getCookie(STORAGE_KEY);
     if (stored === "light" || stored === "dark" || stored === "system") {
       return stored;
     }
-  } catch {
-    // localStorage unavailable — SSR or private browsing
-  }
+  } catch {}
   return "system";
 }
 
@@ -51,7 +54,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);
     try {
-      localStorage.setItem(STORAGE_KEY, next);
+      document.cookie = `${STORAGE_KEY}=${encodeURIComponent(next)}; path=/; max-age=31536000`;
     } catch {
       // ignore
     }

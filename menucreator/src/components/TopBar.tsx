@@ -123,12 +123,6 @@ export interface TopBarProps {
   onImport?: () => void;
 }
 
-const THEME_CYCLE: Array<{ label: string; icon: string }> = [
-  { label: "System", icon: "💻" },
-  { label: "Light", icon: "☀️" },
-  { label: "Dark", icon: "🌙" },
-];
-
 export function TopBar({ onExport, onImport }: TopBarProps) {
   const { t, language, setLanguage } = useTranslation();
   const { theme, setTheme } = useTheme();
@@ -171,16 +165,16 @@ export function TopBar({ onExport, onImport }: TopBarProps) {
           <option value="en">English</option>
           <option value="cs">Čeština</option>
         </select>
-        <button
-          style={btnBase}
-          onClick={() => {
-            const next = theme === "system" ? "light" : theme === "light" ? "dark" : "system";
-            setTheme(next);
-          }}
-          title={`Theme: ${THEME_CYCLE.find(m => m.label.toLowerCase() === theme)?.label ?? "System"}`}
+        <select
+          value={theme}
+          onChange={(e) => setTheme(e.target.value as "light" | "dark" | "system")}
+          style={langSelect}
+          title="Theme"
         >
-          {THEME_CYCLE.find(m => m.label.toLowerCase() === theme)?.icon ?? "💻"}
-        </button>
+          <option value="system">System</option>
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
       </div>
 
       {/* ── Center: undo / redo ── */}
@@ -254,7 +248,11 @@ export function TopBar({ onExport, onImport }: TopBarProps) {
         </button>
 
         {/* Import */}
-        <button style={btnBase} onClick={onImport} title={t.import}>
+        <button
+          style={{ ...btnBase, opacity: 0.5, cursor: "not-allowed" }}
+          onClick={() => window.alert("Not implemented yet")}
+          title="Not implemented yet"
+        >
           {t.import}
         </button>
       </div>
