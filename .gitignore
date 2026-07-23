@@ -1,0 +1,6 @@
+# OpenCode / OhMyOpenCode session & config files
+.opencode/
+.omo/
+AGENTS.md
+*.opencode.json
+*.opencode.jsonc

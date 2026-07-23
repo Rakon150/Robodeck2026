@@ -8,7 +8,8 @@
         "colors": "0.1.0",
         "saturn": "0.1.0",
         "game-loop": "0.1.0",
-        "button": "0.1.0"
+        "button": "0.1.0",
+        "piezo": "0.1.0"
     },
     "files": [
         "build/**/*"
