@@ -12,7 +12,8 @@
         "piezo": "0.1.0"
     },
     "files": [
-        "build/**/*"
+        "build/**/*",
+        "assets/**/*"
     ],
     "type": "module",
     "main": "./build/index.js",

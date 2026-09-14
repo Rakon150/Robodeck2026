@@ -8,6 +8,7 @@ import PixelCanvas from "./components/PixelCanvas";
 import ColorPicker from "./components/ColorPicker";
 import { PropertiesPanel } from "./components/PropertiesPanel";
 import { CodeExporter } from "./components/CodeExporter";
+import { CodeImporter } from "./components/CodeImporter";
 import { LayersPanel } from "./components/LayersPanel";
 import { ShortcutsHelp } from "./components/ShortcutsHelp";
 import { MobileWarning } from "./components/MobileWarning";
@@ -27,6 +28,7 @@ const TOOL_SHORTCUTS: Record<string, Tool> = {
 
 export function App() {
   const [showCodeExporter, setShowCodeExporter] = useState(false);
+  const [showCodeImporter, setShowCodeImporter] = useState(false);
   const [isPanMode, setIsPanMode] = useState(false);
   const panModeRef = useRef(false);
   const [sidebarWidth, setSidebarWidth] = useState(220);
@@ -199,7 +201,10 @@ export function App() {
     <div style={styles.root}>
       {/* TopBar — full width */}
       <div style={styles.topbar}>
-        <TopBar onExport={() => setShowCodeExporter(true)} />
+        <TopBar
+          onExport={() => setShowCodeExporter(true)}
+          onImport={() => setShowCodeImporter(true)}
+        />
       </div>
 
       {/* Body: left sidebar + canvas + right sidebar */}
@@ -247,6 +252,21 @@ export function App() {
             onClick={(e) => e.stopPropagation()}
           >
             <CodeExporter isOpen={showCodeExporter} onClose={() => setShowCodeExporter(false)} />
+          </div>
+        </div>
+      )}
+
+      {/* Code Importer Modal */}
+      {showCodeImporter && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowCodeImporter(false)}
+        >
+          <div
+            className="modal-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <CodeImporter isOpen={showCodeImporter} onClose={() => setShowCodeImporter(false)} />
           </div>
         </div>
       )}

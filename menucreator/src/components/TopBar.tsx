@@ -248,11 +248,7 @@ export function TopBar({ onExport, onImport }: TopBarProps) {
         </button>
 
         {/* Import */}
-        <button
-          style={{ ...btnBase, opacity: 0.5, cursor: "not-allowed" }}
-          onClick={() => window.alert("Not implemented yet")}
-          title="Not implemented yet"
-        >
+        <button style={btnBase} onClick={onImport} title={t.import}>
           {t.import}
         </button>
       </div>

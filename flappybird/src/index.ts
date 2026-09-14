@@ -4,475 +4,16 @@ import { Circle, LineSegment, Rectangle } from "shapes";
 import * as colors from "colors";
 import * as adc from "adc";
 import { SaturnPins } from "saturn";
-import { Font } from "renderer";
+import { Font, Texture } from "renderer";
 import { Button } from "button";
 import { Collection } from "shapes";
 import { Display } from "rphub75";
 import { PIEZO, Effects, Volume, Tones } from "piezo";
 
 const font = new Font();
-const piezo = new PIEZO(SaturnPins.Pmod2.Pin1);
+
+const piezo = new PIEZO(SaturnPins.Pmod3.Pin1);
 piezo.setVolume(Volume.ON);
-
-function generateScene() {
-	const scene = new Collection({ x: 0, y: 0, z: 0 });
-
-	const rectangle_sg330 = new Rectangle({
-		x: 4, y: 0,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 6, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg330);
-
-	const rectangle_sg331 = new Rectangle({
-		x: 2, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg331);
-
-	const rectangle_sg332 = new Rectangle({
-		x: 4, y: 1,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 3, height: 1,
-		fill: true
-	});	
-	scene.add(rectangle_sg332);
-
-	const rectangle_sg333 = new Rectangle({
-		x: 7, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 2,
-		fill: true
-	});
-	scene.add(rectangle_sg333);
-
-	const rectangle_sg334 = new Rectangle({
-		x: 8, y: 1,
-		color: colors.rgb(255, 255, 255),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg334);
-
-	const rectangle_sg335 = new Rectangle({
-		x: 10, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 3,
-		fill: true
-	});
-	scene.add(rectangle_sg335);
-
-	const rectangle_sg336 = new Rectangle({
-		x: 1, y: 2,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 3,
-		fill: true
-	});
-	scene.add(rectangle_sg336);
-
-	const rectangle_sg337 = new Rectangle({
-		x: 2, y: 2,
-		color: colors.rgb(255, 255, 255),
-		z: 0,
-		width: 2, height: 2,
-		fill: true
-	});
-	scene.add(rectangle_sg337);
-
-	const rectangle_sg338 = new Rectangle({
-		x: 5, y: 2,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg338);
-
-	const rectangle_sg339 = new Rectangle({
-		x: 8, y: 2,
-		color: colors.rgb(255, 255, 255),
-		z: 0,
-		width: 1, height: 2,
-		fill: true
-	});
-	scene.add(rectangle_sg339);
-
-	const rectangle_sg33a = new Rectangle({
-		x: 9, y: 2,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33a);
-
-	const rectangle_sg33b = new Rectangle({
-		x: 4, y: 3,
-		color: colors.rgb(255, 255, 255),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33b);
-
-	const rectangle_sg33c = new Rectangle({
-		x: 6, y: 3,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 1, height: 4,
-		fill: true
-	});
-	scene.add(rectangle_sg33c);
-
-	const rectangle_sg33d = new Rectangle({
-		x: 9, y: 3,
-		color: colors.rgb(255, 255, 255),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33d);
-
-	const rectangle_sg33e = new Rectangle({
-		x: 2, y: 4,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33e);
-
-	const rectangle_sg33f = new Rectangle({
-		x: 5, y: 4,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 1, height: 2,
-		fill: true
-	});
-	scene.add(rectangle_sg33f);
-
-	const rectangle_sg33g = new Rectangle({
-		x: 7, y: 4,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33g);
-
-	const rectangle_sg33h = new Rectangle({
-		x: 8, y: 4,
-		color: colors.rgb(255, 136, 0),
-		z: 0,
-		width: 4, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33h);
-
-	const rectangle_sg33i = new Rectangle({
-		x: 2, y: 5,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33i);
-
-	const rectangle_sg33j = new Rectangle({
-		x: 4, y: 5,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33j);
-
-	const rectangle_sg33k = new Rectangle({
-		x: 7, y: 5,
-		color: colors.rgb(255, 136, 0),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33k);
-
-	const rectangle_sg33l = new Rectangle({
-		x: 8, y: 5,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 4, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33l);
-
-	const rectangle_sg33m = new Rectangle({
-		x: 12, y: 5,
-		color: colors.rgb(255, 136, 0),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33m);
-
-	const rectangle_sg33n = new Rectangle({
-		x: 4, y: 6,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33n);
-
-	const rectangle_sg33o = new Rectangle({
-		x: 7, y: 6,
-		color: colors.rgb(255, 255, 0),
-		z: 0,
-		width: 1, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33o);
-
-	const rectangle_sg33p = new Rectangle({
-		x: 8, y: 6,
-		color: colors.rgb(255, 136, 0),
-		z: 0,
-		width: 4, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33p);
-
-	const rectangle_sg33q = new Rectangle({
-		x: 6, y: 7,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 2, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_sg33q);
-
-	return scene;
-}
-
-function generatePipeBottom() {
-	const scene = new Collection({ x: 0, y: 0, z: 0 });
-
-	const rectangle_fdq0 = new Rectangle({
-		x: 0, y: 0,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 10, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_fdq0);
-
-	const rectangle_fdq1 = new Rectangle({
-		x: 0, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 4,
-		fill: true
-	});
-	scene.add(rectangle_fdq1);
-
-	const rectangle_fdq2 = new Rectangle({
-		x: 1, y: 1,
-		color: colors.rgb(85, 255, 85),
-		z: 0,
-		width: 4, height: 3,
-		fill: true
-	});
-	scene.add(rectangle_fdq2);
-
-	const rectangle_fdq3 = new Rectangle({
-		x: 5, y: 1,
-		color: colors.rgb(0, 255, 0),
-		z: 0,
-		width: 4, height: 3,
-		fill: true
-	});
-	scene.add(rectangle_fdq3);
-
-	const rectangle_fdq4 = new Rectangle({
-		x: 9, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 4,
-		fill: true
-	});
-	scene.add(rectangle_fdq4);
-
-	const rectangle_fdq5 = new Rectangle({
-		x: 1, y: 4,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 8, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_fdq5);
-
-	const rectangle_fdq6 = new Rectangle({
-		x: 1, y: 5,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 45,
-		fill: true
-	});
-	scene.add(rectangle_fdq6);
-
-	const rectangle_fdq7 = new Rectangle({
-		x: 2, y: 5,
-		color: colors.rgb(85, 255, 85),
-		z: 0,
-		width: 3, height: 44,
-		fill: true
-	});
-	scene.add(rectangle_fdq7);
-
-	const rectangle_fdq8 = new Rectangle({
-		x: 5, y: 5,
-		color: colors.rgb(0, 255, 0),
-		z: 0,
-		width: 3, height: 44,
-		fill: true
-	});
-	scene.add(rectangle_fdq8);
-
-	const rectangle_fdq9 = new Rectangle({
-		x: 8, y: 5,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 45,
-		fill: true
-	});
-	scene.add(rectangle_fdq9);
-
-	const rectangle_fdqa = new Rectangle({
-		x: 2, y: 49,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 6, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_fdqa);
-
-	return scene;
-}
-
-function generatePipeTop() {
-	const scene = new Collection({ x: 0, y: 0, z: 0 });
-
-	const rectangle_m4lm = new Rectangle({
-		x: 1, y: 0,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 8, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_m4lm);
-
-	const rectangle_m4ln = new Rectangle({
-		x: 1, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 45,
-		fill: true
-	});
-	scene.add(rectangle_m4ln);
-
-	const rectangle_m4lo = new Rectangle({
-		x: 2, y: 1,
-		color: colors.rgb(85, 255, 85),
-		z: 0,
-		width: 3, height: 44,
-		fill: true
-	});
-	scene.add(rectangle_m4lo);
-
-	const rectangle_m4lp = new Rectangle({
-		x: 5, y: 1,
-		color: colors.rgb(0, 255, 0),
-		z: 0,
-		width: 3, height: 44,
-		fill: true
-	});
-	scene.add(rectangle_m4lp);
-
-	const rectangle_m4lq = new Rectangle({
-		x: 8, y: 1,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 45,
-		fill: true
-	});
-	scene.add(rectangle_m4lq);
-
-	const rectangle_m4lr = new Rectangle({
-		x: 0, y: 45,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 5,
-		fill: true
-	});
-	scene.add(rectangle_m4lr);
-
-	const rectangle_m4ls = new Rectangle({
-		x: 2, y: 45,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 6, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_m4ls);
-
-	const rectangle_m4lt = new Rectangle({
-		x: 9, y: 45,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 1, height: 5,
-		fill: true
-	});
-	scene.add(rectangle_m4lt);
-
-	const rectangle_m4lu = new Rectangle({
-		x: 1, y: 46,
-		color: colors.rgb(85, 255, 85),
-		z: 0,
-		width: 4, height: 3,
-		fill: true
-	});
-	scene.add(rectangle_m4lu);
-
-	const rectangle_m4lv = new Rectangle({
-		x: 5, y: 46,
-		color: colors.rgb(0, 255, 0),
-		z: 0,
-		width: 4, height: 3,
-		fill: true
-	});
-	scene.add(rectangle_m4lv);
-
-	const rectangle_m4lw = new Rectangle({
-		x: 1, y: 49,
-		color: colors.rgb(0, 0, 0),
-		z: 0,
-		width: 8, height: 1,
-		fill: true
-	});
-	scene.add(rectangle_m4lw);
-
-	return scene;
-}
-
 
 adc.configure(SaturnPins.Pmod1.Pin1);
 adc.configure(SaturnPins.Pmod1.Pin2);
@@ -484,13 +25,18 @@ let jumpThresh = -100
 let isPressed = false;
 const btnStick = new Button(SaturnPins.Pmod1.Pin4);
 
+const btnDpad1 = new Button(SaturnPins.Pmod2.Pin1);
+const btnDpad2 = new Button(SaturnPins.Pmod2.Pin2);
+const btnDpad3 = new Button(SaturnPins.Pmod2.Pin3);
+const btnDpad4 = new Button(SaturnPins.Pmod2.Pin4);
+
 setInterval(() => {
 	x = adc.read(SaturnPins.Pmod1.Pin1);
 	y = adc.read(SaturnPins.Pmod1.Pin2);
 	x -= 475;
 	y -= 475;
-	//console.log(`X: ${x}, Y: ${y}`);
-	isPressed = btnStick.isPressed();
+	//console.log(`X: ${x}, Y: ${y}`); //joystick debug
+	isPressed = btnStick.isPressed() || btnDpad1.isPressed() ||  btnDpad2.isPressed() ||  btnDpad3.isPressed() ||  btnDpad4.isPressed(); //vrchol inzenyrstvi fr
 }, 50);
 
 let score = 0;
@@ -501,7 +47,7 @@ let loop = new GameLoop(saturn.display);
 let difficulty = 1;
 let pX = 8;
 let pY = 30;
-let pillarX = 100;
+let pillarX = 150;
 let pillarGapSize = 50;
 let vsp = 0;
 let jumpSpd = -0.6;
@@ -518,15 +64,27 @@ let colisionTolerance = -1;
 
 let previousGapCenterY: number | null = null;
 let gapVelocity = 0;
-let previousGapSize = 30;
-const minGapCenterY = 14;
-const maxGapCenterY = 50;
+let previousGapSize = 50;
+const minGapCenterY = 25;
+const maxGapCenterY = 60;
 const gapMomentum = 0.6;
 const maxGapStep = 20;
 const gapWallBounce = 0.5;
 const sizeMomentum = 0.5;
 const sizeCenter = 30;
 const sizeJitter = 5;
+
+let birdBmp = new Texture();
+let birdOk = birdBmp.load("/data/code/assets/bird.bmp")
+if (!birdOk) console.error("birdBmp not loaded");
+
+let pipeTopBmp = new Texture();
+let pipeTopOk = pipeTopBmp.load("/data/code/assets/pipeTop.bmp")
+if (!pipeTopOk) console.error("pipeTopBmp not loaded");
+
+let pipeBottomBmp = new Texture();
+let pipeBottomOk = pipeBottomBmp.load("/data/code/assets/pipeBottom.bmp")
+if (!pipeBottomOk) console.error("pipeBottomBpm not loaded");
 
 function wrap(val: number, min: number, max: number): number {
 	var range = max - min;
@@ -581,7 +139,7 @@ async function resetGame() {
 	pillarX = 100;
 	vsp = 0;
 	pause = true;
-	score = Math.floor(score);
+	score = Math.round(score);
 	var hscbeat = false;
 	if (score > highScore) {
 		highScore = score;
@@ -610,13 +168,37 @@ let bg = new Rectangle({
 	fill: true
 });
 loop.addShape(bg);
-let player = generateScene();
 
-let pillarBottom = generatePipeTop();
+let player = new Rectangle({
+	x: pX, y: pY,
+	width: 17, height: 12,
+	color: 0xffffff,
+	fill: true
+});
+player.setTexture(birdBmp);
+player.setFixTexture(true);
+
+let pillarBottom = new Rectangle({
+	x: 0, y: 0,
+	width: pillarWidth, height: pillarHeight,
+	color: 0xffffff,
+	fill: true
+});
+pillarBottom.setTexture(pipeTopBmp);
+pillarBottom.setFixTexture(true);
 loop.addShape(pillarBottom);
-let pillarTop = generatePipeBottom();
+
+let pillarTop = new Rectangle({
+	x: 0, y: 0,
+	width: pillarWidth, height: pillarHeight,
+	color: 0xffffff,
+	fill: true
+});
+pillarTop.setTexture(pipeBottomBmp);
+pillarTop.setFixTexture(true);
 loop.addShape(player);
 loop.addShape(pillarTop);
+
 let scoreBoardBg = new Rectangle({
 	x: 12,
 	y: 17,
@@ -681,6 +263,7 @@ loop.on("tick", (delta) => {
 		pillarTop.setPosition(pillarX, pillarTop.getY());
 		if (pillarX < -11) {
 			resetPillar();
+			console.log(score)
 		}
 		if (Math.abs(pillarX - pX) < (playerWidth + pillarWidth) / 2 + colisionTolerance && (pY < pillarBottom.getY() + pillarHeight + colisionTolerance || pY + playerHeight > pillarTop.getY() - colisionTolerance)) {
 			resetGame();
@@ -701,7 +284,6 @@ loop.on("tick", (delta) => {
 		} else if (difficulty >= 1.9) {
 			difficulty = 2;
 		}
-		console.log(difficulty)
 		if (isPressed) {
 			loop.removeShape(difficultyline);
 			loop.removeShape(difficultySegment1);

@@ -145,3 +145,76 @@ export function generateTypeScriptOptimized(
 ): string {
   return generateScene(grid, config, [], shapeName);
 }
+
+/**
+ * Encodes a pixel grid as a 32bpp bottom-up BMP (BITMAPV4HEADER, BI_BITFIELDS)
+ * with a true alpha channel, so transparent cells stay transparent in the
+ * file. Built by hand because canvas.toBlob() has no "image/bmp" output type.
+ *
+ * Bottom-up (positive height) is required, not just conventional: some BMP
+ * readers (e.g. the RoboDeck firmware's Texture::fromBMP) reject any file
+ * with a negative/top-down height outright.
+ */
+export function gridToBmpBlob(grid: PixelGrid): Blob {
+  const height = grid.length;
+  const width = grid[0]?.length ?? 0;
+
+  const HEADER_SIZE = 108; // BITMAPV4HEADER
+  const FILE_HEADER_SIZE = 14;
+  const pixelDataSize = width * height * 4;
+  const fileSize = FILE_HEADER_SIZE + HEADER_SIZE + pixelDataSize;
+
+  const buffer = new ArrayBuffer(fileSize);
+  const view = new DataView(buffer);
+  let o = 0;
+
+  // BITMAPFILEHEADER
+  view.setUint8(o, 0x42); o += 1; // 'B'
+  view.setUint8(o, 0x4d); o += 1; // 'M'
+  view.setUint32(o, fileSize, true); o += 4;
+  view.setUint32(o, 0, true); o += 4; // reserved
+  view.setUint32(o, FILE_HEADER_SIZE + HEADER_SIZE, true); o += 4; // pixel data offset
+
+  // BITMAPV4HEADER
+  view.setUint32(o, HEADER_SIZE, true); o += 4;
+  view.setInt32(o, width, true); o += 4;
+  view.setInt32(o, height, true); o += 4; // positive height = bottom-up rows (some BMP readers reject negative/top-down heights)
+  view.setUint16(o, 1, true); o += 2; // planes
+  view.setUint16(o, 32, true); o += 2; // bits per pixel
+  view.setUint32(o, 3, true); o += 4; // BI_BITFIELDS
+  view.setUint32(o, pixelDataSize, true); o += 4;
+  view.setInt32(o, 2835, true); o += 4; // ~72 DPI
+  view.setInt32(o, 2835, true); o += 4;
+  view.setUint32(o, 0, true); o += 4; // colors used
+  view.setUint32(o, 0, true); o += 4; // important colors
+  view.setUint32(o, 0x00ff0000, true); o += 4; // red mask
+  view.setUint32(o, 0x0000ff00, true); o += 4; // green mask
+  view.setUint32(o, 0x000000ff, true); o += 4; // blue mask
+  view.setUint32(o, 0xff000000, true); o += 4; // alpha mask
+  view.setUint32(o, 0x73524742, true); o += 4; // color space: LCS_sRGB
+  o += 36; // CIEXYZTRIPLE endpoints (unused, zeroed)
+  o += 12; // gamma red/green/blue (unused, zeroed)
+
+  // Pixel data: bottom-up rows (file row 0 is grid's last row), each pixel
+  // packed as B,G,R,A to match the masks above.
+  for (let fileRow = 0; fileRow < height; fileRow++) {
+    const y = height - 1 - fileRow;
+    for (let x = 0; x < width; x++) {
+      const color = grid[y]?.[x];
+      let r = 0, g = 0, b = 0, a = 0;
+      if (color && color !== "transparent") {
+        const hex = color.replace("#", "");
+        r = parseInt(hex.slice(0, 2), 16);
+        g = parseInt(hex.slice(2, 4), 16);
+        b = parseInt(hex.slice(4, 6), 16);
+        a = 255;
+      }
+      view.setUint8(o, b); o += 1;
+      view.setUint8(o, g); o += 1;
+      view.setUint8(o, r); o += 1;
+      view.setUint8(o, a); o += 1;
+    }
+  }
+
+  return new Blob([buffer], { type: "image/bmp" });
+}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePixelStore } from "../store/pixelStore";
-import { generateScene } from "../utils/codeGen";
+import { generateScene, gridToBmpBlob } from "../utils/codeGen";
 
 const C = {
   mantle: "#181825",
@@ -274,6 +274,19 @@ export function CodeExporter({ isOpen, onClose }: CodeExporterProps) {
     URL.revokeObjectURL(url);
   }, [generatedCode, shapeName]);
 
+  const handleDownloadBmp = useCallback(() => {
+    if (grid.length === 0 || (grid[0]?.length ?? 0) === 0) return;
+    const blob = gridToBmpBlob(grid);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${shapeName}.bmp`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, [grid, shapeName]);
+
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
@@ -325,6 +338,9 @@ export function CodeExporter({ isOpen, onClose }: CodeExporterProps) {
         <div style={footer}>
           <button style={btnBase} onClick={onClose}>
             Close
+          </button>
+          <button style={btnSuccess} onClick={handleDownloadBmp}>
+            Download BMP
           </button>
           <button style={btnSuccess} onClick={handleDownload}>
             Download .ts
