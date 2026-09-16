@@ -15,11 +15,16 @@ export function ToolOptionsPanel({ sidebarWidth }: ToolOptionsPanelProps) {
   const setShapeFill = usePixelStore((s) => s.setShapeFill);
   const setBrushSize = usePixelStore((s) => s.setBrushSize);
   const setStrokeWidth = usePixelStore((s) => s.setStrokeWidth);
+  const selection = usePixelStore((s) => s.selection);
+  const selectAll = usePixelStore((s) => s.selectAll);
+  const clearSelection = usePixelStore((s) => s.clearSelection);
+  const moveSelection = usePixelStore((s) => s.moveSelection);
 
   const [isMinimized, setIsMinimized] = useState(false);
 
-  const hasOptions = activeTool === "pencil" || activeTool === "eraser" || 
-                     activeTool === "rectangle" || activeTool === "circle" || activeTool === "line";
+  const hasOptions = activeTool === "pencil" || activeTool === "eraser" ||
+                     activeTool === "rectangle" || activeTool === "circle" || activeTool === "line" ||
+                     activeTool === "select";
 
   if (!hasOptions) return null;
 
@@ -109,6 +114,7 @@ export function ToolOptionsPanel({ sidebarWidth }: ToolOptionsPanelProps) {
                   />
                   <span style={styles.unit}>px</span>
                 </div>
+                <span style={styles.hint}>Hold Shift while dragging for square / circle</span>
               </div>
             </>
           )}
@@ -127,7 +133,40 @@ export function ToolOptionsPanel({ sidebarWidth }: ToolOptionsPanelProps) {
                 />
                 <span style={styles.unit}>px</span>
               </div>
+              <span style={styles.hint}>Hold Shift while dragging to snap to 45°</span>
             </div>
+          )}
+
+          {activeTool === "select" && (
+            <>
+              <div style={styles.option}>
+                <label style={styles.label}>Selection</label>
+                <div style={styles.inputRow}>
+                  <button style={styles.actionBtn} onClick={selectAll}>
+                    Select all
+                  </button>
+                  <button
+                    style={styles.actionBtn}
+                    onClick={clearSelection}
+                    disabled={!selection || selection.points.length === 0}
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+              <div style={styles.option}>
+                <label style={styles.label}>Move area</label>
+                <div style={styles.nudgeGrid}>
+                  <span />
+                  <button style={styles.nudgeBtn} onClick={() => moveSelection(0, -1)} title="Move up (↑)">↑</button>
+                  <span />
+                  <button style={styles.nudgeBtn} onClick={() => moveSelection(-1, 0)} title="Move left (←)">←</button>
+                  <button style={styles.nudgeBtn} onClick={() => moveSelection(0, 1)} title="Move down (↓)">↓</button>
+                  <button style={styles.nudgeBtn} onClick={() => moveSelection(1, 0)} title="Move right (→)">→</button>
+                </div>
+                <span style={styles.hint}>Tip: drag inside the selection to move it</span>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -229,5 +268,40 @@ const styles: Record<string, React.CSSProperties> = {
   },
   radio: {
     accentColor: "var(--accent)",
+  },
+  actionBtn: {
+    flex: 1,
+    height: 28,
+    padding: "0 8px",
+    border: "1px solid var(--surface-active)",
+    borderRadius: 6,
+    background: "var(--surface-hover)",
+    color: "var(--text)",
+    fontSize: 12,
+    fontWeight: 600,
+    fontFamily: "inherit",
+    cursor: "pointer",
+  },
+  nudgeGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 32px)",
+    gridTemplateRows: "repeat(2, 28px)",
+    gap: 4,
+    justifyContent: "start",
+  },
+  nudgeBtn: {
+    height: 28,
+    border: "1px solid var(--surface-active)",
+    borderRadius: 6,
+    background: "var(--surface-hover)",
+    color: "var(--text)",
+    fontSize: 14,
+    fontFamily: "inherit",
+    cursor: "pointer",
+    lineHeight: 1,
+  },
+  hint: {
+    fontSize: 11,
+    color: "var(--text-dim)",
   },
 };

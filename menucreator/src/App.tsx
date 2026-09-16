@@ -44,6 +44,8 @@ export function App() {
   const copySelection = usePixelStore((s) => s.copySelection);
   const cutSelection = usePixelStore((s) => s.cutSelection);
   const pasteClipboard = usePixelStore((s) => s.pasteClipboard);
+  const selectAll = usePixelStore((s) => s.selectAll);
+  const clearSelection = usePixelStore((s) => s.clearSelection);
   const selection = usePixelStore((s) => s.selection);
   const clipboard = usePixelStore((s) => s.clipboard);
   const { addToast } = useToast();
@@ -74,6 +76,11 @@ export function App() {
         return;
       }
 
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        selectAll();
+        return;
+      }
       if ((e.ctrlKey || e.metaKey) && e.key === "c") {
         if (selection && selection.points.length > 0) {
           e.preventDefault();
@@ -100,6 +107,13 @@ export function App() {
       }
 
       if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+        if (e.key === "Escape") {
+          if (selection && selection.points.length > 0) {
+            e.preventDefault();
+            clearSelection();
+            return;
+          }
+        }
         if (e.key === "Delete" || e.key === "Backspace") {
           if (selection && selection.points.length > 0) {
             e.preventDefault();
@@ -154,7 +168,7 @@ export function App() {
         setIsPanMode(true);
       }
     },
-    [undo, redo, setActiveTool, setZoom, config.zoom, deleteSelection, moveSelection, copySelection, cutSelection, pasteClipboard, selection, clipboard, addToast],
+    [undo, redo, setActiveTool, setZoom, config.zoom, deleteSelection, moveSelection, copySelection, cutSelection, pasteClipboard, selectAll, clearSelection, selection, clipboard, addToast],
   );
 
   const handleKeyUp = useCallback((e: KeyboardEvent) => {

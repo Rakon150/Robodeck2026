@@ -82,9 +82,10 @@ interface PixelStore {
 
   setSelection: (selection: Selection | null) => void;
   addToSelection: (points: Point[]) => void;
+  selectAll: () => void;
   clearSelection: () => void;
   deleteSelection: () => void;
-  moveSelection: (dx: number, dy: number) => void;
+  moveSelection: (dx: number, dy: number, recordHistory?: boolean) => void;
   fillSelection: (color: string) => void;
 
   copySelection: () => void;
@@ -304,7 +305,13 @@ export const usePixelStore = create<PixelStore>((set, get) => {
       get().pushHistory();
     },
 
-    setActiveTool: (tool) => set({ activeTool: tool, shapePreview: null, selection: null }),
+    setActiveTool: (tool) => set((s) => ({
+      activeTool: tool,
+      shapePreview: null,
+      // Keep the existing selection when switching TO the select tool so
+      // Ctrl+A / toolbar flows don't wipe it; clear it for other tools.
+      selection: tool === "select" ? s.selection : null,
+    })),
     setCurrentColor: (color) => set({ currentColor: color }),
     setShapeFill: (fill) => set({ shapeFill: fill }),
     setBrushSize: (size) => set({ brushSize: Math.max(1, Math.min(16, size)) }),
@@ -363,6 +370,22 @@ export const usePixelStore = create<PixelStore>((set, get) => {
       }
     },
     clearSelection: () => set({ selection: null }),
+    selectAll: () => {
+      const { config } = get();
+      const points: Point[] = [];
+      for (let y = 0; y < config.height; y++) {
+        for (let x = 0; x < config.width; x++) {
+          points.push({ x, y });
+        }
+      }
+      set({
+        activeTool: "select",
+        selection: {
+          points,
+          bounds: { x: 0, y: 0, width: config.width, height: config.height },
+        },
+      });
+    },
     deleteSelection: () => {
       const { selection, layers, activeLayerId, config } = get();
       if (!selection) return;
@@ -381,7 +404,7 @@ export const usePixelStore = create<PixelStore>((set, get) => {
       set({ layers: newLayers, selection: null });
       get().pushHistory();
     },
-    moveSelection: (dx, dy) => {
+    moveSelection: (dx, dy, recordHistory = true) => {
       const { selection, layers, activeLayerId, config } = get();
       if (!selection) return;
       const layerIndex = layers.findIndex(l => l.id === activeLayerId);
@@ -411,6 +434,7 @@ export const usePixelStore = create<PixelStore>((set, get) => {
       const newLayers = [...layers];
       newLayers[layerIndex] = { ...layer, grid: newGrid };
       set({ layers: newLayers, selection: { points: newPoints, bounds } });
+      if (recordHistory) get().pushHistory();
     },
     fillSelection: (color) => {
       const { selection, layers, activeLayerId, config } = get();

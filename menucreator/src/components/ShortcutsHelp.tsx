@@ -27,6 +27,7 @@ export function ShortcutsHelp() {
         { keys: "G", action: t.fill },
         { keys: "I", action: t.colorPicker },
         { keys: "S", action: t.select },
+        { keys: "Shift + Drag (shape)", action: "Square / circle / snap line to 45°" },
         { keys: "Del / Bksp", action: t.deleteSelection || "Delete selection" },
       ],
     },
@@ -34,6 +35,9 @@ export function ShortcutsHelp() {
       title: "Selection",
       shortcuts: [
         { keys: "Arrow Keys", action: "Move selection" },
+        { keys: "Drag inside selection", action: "Move selection" },
+        { keys: "Ctrl+A", action: "Select entire canvas" },
+        { keys: "Esc", action: "Clear selection" },
         { keys: "Ctrl+C", action: "Copy" },
         { keys: "Ctrl+X", action: "Cut" },
         { keys: "Ctrl+V", action: "Paste" },

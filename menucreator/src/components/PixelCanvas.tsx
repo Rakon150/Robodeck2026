@@ -44,6 +44,43 @@ function clampToGrid(p: Point, w: number, h: number): Point | null {
   return p;
 }
 
+function clampPointToGrid(p: Point, w: number, h: number): Point {
+  return {
+    x: Math.max(0, Math.min(w - 1, p.x)),
+    y: Math.max(0, Math.min(h - 1, p.y)),
+  };
+}
+
+function pointInBounds(
+  p: Point,
+  b: { x: number; y: number; width: number; height: number },
+): boolean {
+  return p.x >= b.x && p.x < b.x + b.width && p.y >= b.y && p.y < b.y + b.height;
+}
+
+function constrainShapeEnd(
+  tool: ShapePreview["tool"],
+  start: Point,
+  end: Point,
+): Point {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  if (dx === 0 && dy === 0) return end;
+  if (tool === "line") {
+    const len = Math.sqrt(dx * dx + dy * dy);
+    const snapped = Math.round(Math.atan2(dy, dx) / (Math.PI / 4)) * (Math.PI / 4);
+    return {
+      x: start.x + Math.round(len * Math.cos(snapped)),
+      y: start.y + Math.round(len * Math.sin(snapped)),
+    };
+  }
+  const side = Math.max(Math.abs(dx), Math.abs(dy));
+  return {
+    x: start.x + (dx === 0 ? 0 : Math.sign(dx) * side),
+    y: start.y + (dy === 0 ? 0 : Math.sign(dy) * side),
+  };
+}
+
 // ─── Selection Helpers ────────────────────────────────────────────────────────
 
 function getRectanglePoints(x1: number, y1: number, x2: number, y2: number): Point[] {
@@ -190,6 +227,9 @@ interface Drag {
   panOrigin: Point | null;
   selectionStart: Point | null;
   selectionMode: "replace" | "add" | "remove";
+  movingSelection: boolean;
+  moveLast: Point | null;
+  movedSelection: boolean;
 }
 
 interface PixelCanvasProps {
@@ -209,6 +249,9 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
     panOrigin: null,
     selectionStart: null,
     selectionMode: "replace",
+    movingSelection: false,
+    moveLast: null,
+    movedSelection: false,
   });
   const initializedRef = useRef(false);
   const { addToast } = useToast();
@@ -303,7 +346,7 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         } else if (tool === "picker") {
         cursor = "crosshair";
       } else if (tool === "select") {
-        cursor = "crosshair";
+        cursor = d.movingSelection ? "move" : "crosshair";
       } else if (isPanMode) {
         cursor = "grab";
       }
@@ -365,8 +408,24 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
 
       const gp = screenToGrid(e.clientX, e.clientY, cvs, panRef.current, s.config.zoom, window.devicePixelRatio || 1);
       if (!gp) return;
-      const clamped = clampToGrid(gp, s.config.width, s.config.height);
-      if (!clamped) return;
+
+      if (d.movingSelection && d.moveLast) {
+        const target = clampPointToGrid(gp, s.config.width, s.config.height);
+        const dx = target.x - d.moveLast.x;
+        const dy = target.y - d.moveLast.y;
+        if (dx !== 0 || dy !== 0) {
+          s.moveSelection(dx, dy, false);
+          d.moveLast = target;
+          d.movedSelection = true;
+        }
+        return;
+      }
+
+      let clamped = clampToGrid(gp, s.config.width, s.config.height);
+      if (!clamped) {
+        if (s.activeTool !== "select") return;
+        clamped = clampPointToGrid(gp, s.config.width, s.config.height);
+      }
 
       switch (s.activeTool) {
         case "pencil": {
@@ -385,10 +444,13 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         case "circle":
         case "line":
           if (d.shapeOrigin) {
+            const rawEnd = clamped;
+            const tool = s.activeTool as ShapePreview["tool"];
+            const end = e.shiftKey ? constrainShapeEnd(tool, d.shapeOrigin, rawEnd) : rawEnd;
             s.setShapePreview({
-              tool: s.activeTool as ShapePreview["tool"],
+              tool,
               start: d.shapeOrigin,
-              end: clamped,
+              end,
               color: s.currentColor,
               fill: s.shapeFill,
             });
@@ -419,7 +481,7 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
   );
 
   const onUp = useCallback(
-    (_e: MouseEvent) => {
+    (e: MouseEvent) => {
       const d = drag.current;
       const s = usePixelStore.getState();
 
@@ -427,18 +489,26 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         d.panning = false;
         d.panMouse = null;
         d.panOrigin = null;
+      } else if (d.movingSelection) {
+        if (d.movedSelection) s.pushHistory();
+        d.movingSelection = false;
+        d.moveLast = null;
+        d.movedSelection = false;
+        d.drawing = false;
+        d.selectionStart = null;
       } else if (d.drawing) {
         const tool = s.activeTool;
 
         if (tool === "rectangle" || tool === "circle" || tool === "line") {
           if (s.shapePreview) {
             const sp = s.shapePreview;
+            const end = e.shiftKey ? constrainShapeEnd(sp.tool, sp.start, sp.end) : sp.end;
             const pts = getShapePixels(
               sp.tool,
               sp.start.x,
               sp.start.y,
-              sp.end.x,
-              sp.end.y,
+              end.x,
+              end.y,
               sp.fill,
             );
             s.setPixels(pts, sp.color);
@@ -456,18 +526,18 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
             };
 
             if (tool === "rectangle") {
-              const x = Math.min(sp.start.x, sp.end.x);
-              const y = Math.min(sp.start.y, sp.end.y);
-              const w = Math.abs(sp.end.x - sp.start.x) + 1;
-              const h = Math.abs(sp.end.y - sp.start.y) + 1;
+              const x = Math.min(sp.start.x, end.x);
+              const y = Math.min(sp.start.y, end.y);
+              const w = Math.abs(end.x - sp.start.x) + 1;
+              const h = Math.abs(end.y - sp.start.y) + 1;
               shapeObj = { ...baseProps, type: "rectangle", x, y, width: w, height: h, fill: sp.fill === "filled" } as ShapeRectangle;
             } else if (tool === "circle") {
-              const dx = sp.end.x - sp.start.x;
-              const dy = sp.end.y - sp.start.y;
+              const dx = end.x - sp.start.x;
+              const dy = end.y - sp.start.y;
               const r = Math.round(Math.sqrt(dx * dx + dy * dy));
               shapeObj = { ...baseProps, type: "circle", radius: r, fill: sp.fill === "filled" } as ShapeCircle;
             } else {
-              shapeObj = { ...baseProps, type: "line", x2: sp.end.x, y2: sp.end.y } as ShapeLine;
+              shapeObj = { ...baseProps, type: "line", x2: end.x, y2: end.y } as ShapeLine;
             }
 
             s.addShape(shapeObj);
@@ -569,14 +639,30 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         }
 
         case "select": {
-          d.drawing = true;
-          d.selectionStart = clamped;
-          if (e.shiftKey) d.selectionMode = "add";
-          else if (e.ctrlKey || e.metaKey) d.selectionMode = "remove";
-          else d.selectionMode = "replace";
+          const existing = s.selection;
+          const additive = e.shiftKey || e.ctrlKey || e.metaKey;
+          if (
+            !additive &&
+            existing &&
+            existing.points.length > 0 &&
+            existing.bounds &&
+            pointInBounds(clamped, existing.bounds)
+          ) {
+            d.drawing = true;
+            d.movingSelection = true;
+            d.moveLast = clamped;
+            d.movedSelection = false;
+            cvs.style.cursor = "move";
+          } else {
+            d.drawing = true;
+            d.selectionStart = clamped;
+            if (e.shiftKey) d.selectionMode = "add";
+            else if (e.ctrlKey || e.metaKey) d.selectionMode = "remove";
+            else d.selectionMode = "replace";
 
-          if (d.selectionMode === "replace") {
-            s.setSelection({ points: [clamped], bounds: { x: clamped.x, y: clamped.y, width: 1, height: 1 } });
+            if (d.selectionMode === "replace") {
+              s.setSelection({ points: [clamped], bounds: { x: clamped.x, y: clamped.y, width: 1, height: 1 } });
+            }
           }
           window.addEventListener("mousemove", onMove);
           window.addEventListener("mouseup", onUp);
@@ -584,7 +670,22 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         }
       }
     },
-    [onMove, onUp],
+    [onMove, onUp, isPanMode, addToast, t],
+  );
+
+  const onHover = useCallback(
+    (e: React.MouseEvent<HTMLCanvasElement>) => {
+      const d = drag.current;
+      if (d.drawing || d.panning) return;
+      const cvs = canvasRef.current;
+      if (!cvs) return;
+      const s = usePixelStore.getState();
+      if (s.activeTool !== "select" || !s.selection?.bounds) return;
+      const gp = screenToGrid(e.clientX, e.clientY, cvs, panRef.current, s.config.zoom, window.devicePixelRatio || 1);
+      if (!gp) return;
+      cvs.style.cursor = pointInBounds(gp, s.selection.bounds) ? "move" : "crosshair";
+    },
+    [],
   );
 
   useEffect(() => {
@@ -610,6 +711,7 @@ export default function PixelCanvas({ isPanMode = false }: PixelCanvasProps) {
         width={512}
         height={512}
         onMouseDown={onDown}
+        onMouseMove={onHover}
         onContextMenu={(e) => e.preventDefault()}
         style={{ display: "block" }}
       />
